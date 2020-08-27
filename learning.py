@@ -26,17 +26,17 @@ def train_net(model, params, environment, modelname="untitle", train_frames = 50
     replay = []  # stores tuples of (S, A, R, S').
     loss_log = [] 
 
-    # Assain Game State instance.
-    game_state = environment
+    # Assain Env State instance.
+    env_state = environment
 
     # Get initial state by doing nothing and getting the state.
-    _, state, SAVE = game_state.run(0,"T")
+    _, state, SAVE = env_state.run(0,"T")
 
     # Let's time it.
     start_time = timeit.default_timer()
 
     # Run the frames.
-    while (t < train_frames) and not game_state.exit:
+    while (t < train_frames) and not env_state.exit:
         t += 1
         dist_value += 1
         # Choose an action.
@@ -48,7 +48,7 @@ def train_net(model, params, environment, modelname="untitle", train_frames = 50
             action = (np.argmax(qval))  # best
 
         # Take action, observe new state and get our treat.
-        reward, new_state, SAVE = game_state.run(action,"T")
+        reward, new_state, SAVE = env_state.run(action,"T")
 
         # Experience replay storage.
         replay.append((state, action, reward, new_state))
@@ -98,7 +98,7 @@ def train_net(model, params, environment, modelname="untitle", train_frames = 50
             # Output some stuff so we can watch.
             #print("Max: %d at %d\tepsilon %f\t(%d)\t%f fps" %(max_dist_value, t, epsilon, dist_value, fps))
             Msg = ("TRAINING -     Epsilon Value : %f      Max Distance : %d      Last Distance : %d      Total Frams: %d      fps: %f" %(epsilon, max_dist_value, dist_value, t, fps))
-            game_state.setMessage(Msg)
+            env_state.setMessage(Msg)
             # Reset.
             dist_value = 0
             start_time = timeit.default_timer()
@@ -107,7 +107,7 @@ def train_net(model, params, environment, modelname="untitle", train_frames = 50
         #print(SAVE, t)
         if t % 5000 == 0 or SAVE:
             SAVE = False
-            game_state.setSaveMsg("Last Save at "+str(t))
+            env_state.setSaveMsg("Last Save at "+str(t))
             model.save_weights('saved-models/' + filename +'.h5',overwrite=True)
             print("Saving model %s - %d" % (filename, t))
 
