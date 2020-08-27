@@ -1,4 +1,4 @@
-import Environment
+
 import numpy as np
 import random
 import csv
@@ -6,7 +6,7 @@ from nn import neural_net, LossHistory
 import os.path
 import timeit
 
-NUM_INPUT = 3
+NUM_INPUT = 2
 GAMMA = 0.9 # Forgetting.
 TUNING = False  # If False, just use arbitrary, pre-selected params.
 
@@ -19,8 +19,8 @@ def train_net(model, params, environment, modelname="untitle", train_frames = 50
     buffer = params['buffer']
 
     # Just stuff used below.
-    max_car_distance = 0
-    car_distance = 0
+    max_dist_value = 0
+    dist_value = 0
     t = 0
     data_collect = []
     replay = []  # stores tuples of (S, A, R, S').
@@ -38,7 +38,7 @@ def train_net(model, params, environment, modelname="untitle", train_frames = 50
     # Run the frames.
     while (t < train_frames) and not game_state.exit:
         t += 1
-        car_distance += 1
+        dist_value += 1
         # Choose an action.
         if random.random() < epsilon or t < observe:
             action = np.random.randint(0, 3)  # random
@@ -85,22 +85,22 @@ def train_net(model, params, environment, modelname="untitle", train_frames = 50
         # We died, so update stuff.
         if reward == -750:
             # Log the car's distance at this T.
-            data_collect.append([t, car_distance])
+            data_collect.append([t, dist_value])
 
             # Update max.
-            if car_distance > max_car_distance:
-                max_car_distance = car_distance
+            if dist_value > max_dist_value:
+                max_dist_value = dist_value
 
             # Time it.
             tot_time = timeit.default_timer() - start_time
-            fps = car_distance / tot_time
+            fps = dist_value / tot_time
 
             # Output some stuff so we can watch.
-            #print("Max: %d at %d\tepsilon %f\t(%d)\t%f fps" %(max_car_distance, t, epsilon, car_distance, fps))
-            Msg = ("TRAINING -     Epsilon Value : %f      Max Distance : %d      Last Distance : %d      Total Frams: %d      fps: %f" %(epsilon, max_car_distance, car_distance, t, fps))
+            #print("Max: %d at %d\tepsilon %f\t(%d)\t%f fps" %(max_dist_value, t, epsilon, dist_value, fps))
+            Msg = ("TRAINING -     Epsilon Value : %f      Max Distance : %d      Last Distance : %d      Total Frams: %d      fps: %f" %(epsilon, max_dist_value, dist_value, t, fps))
             game_state.setMessage(Msg)
             # Reset.
-            car_distance = 0
+            dist_value = 0
             start_time = timeit.default_timer()
 
         # Save the model every 25,000 frames.
