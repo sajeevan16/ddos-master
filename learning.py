@@ -11,7 +11,7 @@ GAMMA = 0.9 # Forgetting.
 TUNING = False  # If False, just use arbitrary, pre-selected params.
 
 def train_net(model, params, environment, modelname="untitle", train_packets = 50000):
-    filename = modelname#params_to_filename(params)
+    filename = modelname #params_to_filename(params)
     observe = 1000  # Number of packets to observe before training.
     epsilon = 1
     train_packets = train_packets  # Number of packets to play.
@@ -82,8 +82,8 @@ def process_minibatch2(minibatch, model):
 
     maxQs = np.max(new_qvals, axis=1)
     y = old_qvals
-    non_term_inds = np.where(rewards != -750)[0]
-    term_inds = np.where(rewards == -750)[0]
+    non_term_inds = np.where(rewards > 0)[0]
+    term_inds = np.where(rewards <= 0)[0]
 
     y[non_term_inds, actions[non_term_inds].astype(int)] = rewards[non_term_inds] + (GAMMA * maxQs[non_term_inds])
     y[term_inds, actions[term_inds].astype(int)] = rewards[term_inds]
@@ -110,7 +110,7 @@ def process_minibatch(minibatch, model):
         y = np.zeros((1, 3))
         y[:] = old_qval[:]
         # Check for terminal state.
-        if reward_m != -750:  # non-terminal state
+        if reward_m < 0:  # non-terminal state
             update = (reward_m + (GAMMA * maxQ))
         else:  # terminal state
             update = reward_m
