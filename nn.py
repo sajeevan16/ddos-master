@@ -20,7 +20,7 @@ class LossHistory(Callback):
 
 def neural_net(num_sensors, params, load=''):
     model = Sequential()
-
+    
     # First layer.
     model.add(Dense(
         params[0], init='lecun_uniform', input_shape=(num_sensors,)
@@ -34,8 +34,8 @@ def neural_net(num_sensors, params, load=''):
     model.add(Dropout(0.2))
 
     # Output layer.
-    model.add(Dense(3, init='lecun_uniform'))
-    model.add(Activation('linear'))
+    model.add(Dense(2, init='lecun_uniform'))
+    model.add(Activation('tanh'))
 
     rms = RMSprop()
     model.compile(loss='mse', optimizer=rms)
