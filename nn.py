@@ -17,6 +17,9 @@ class LossHistory(Callback):
     def on_batch_end(self, batch, logs={}):
         self.losses.append(logs.get('loss'))
 
+# nn_params = [[164, 150], [256, 256],
+#                      [512, 512], [1000, 1000]]
+# nn_param = [128, 128], 
 
 def neural_net(num_sensors, params, load=''):
     model = Sequential()
