@@ -144,3 +144,4 @@ def launch_learn(params,environment, modelname):
         train_net(model, params, environment, modelname)
     else:
         print("Already tested.")
+
