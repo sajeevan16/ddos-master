@@ -92,6 +92,7 @@ def process_minibatch2(minibatch, model):
     y_train = y
     return X_train, y_train
 
+
 def process_minibatch(minibatch, model):
     """This does the heavy lifting, aka, the training. It's super jacked."""
     X_train = []
