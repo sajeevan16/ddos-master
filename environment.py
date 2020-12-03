@@ -19,10 +19,10 @@ class Environment:
         self.returnmenu = False
         self.dimension_of_state = 0
         self.dimension_of_action = 0
-        self.attacker = {
-            'distributed_pcs' : [],
-
-        }
+        self.currentRequest = ""
+        self.waiting_packets = []
+        self.attacker_pcs = []
+        self.legitimate_users = []
 
     def reset(self, seed=0):
         pass
@@ -32,6 +32,27 @@ class Environment:
         info = None
         
         return (np.array([state,1,1,1]), np.array([reward]), done, info)
+    
+    
+    def defender_run(self,act,Model):
+        dt = self.clock.get_time() / 1000
+        self.distance += 1
+        SAVE = False
+        self.clock.tick(self.ticks)
+        reward = -1
+
+        ## GET AVAILABILTY LIST 
+        
+
+        ## State Data
+        packet_data = ""
+        normalized_readings = [(rx-20.0)/20.0 for rx in packet_data]
+        state = np.array([normalized_readings])
+
+        # Calculate the reward
+  
+        return reward, state, SAVE
+
 
     def defender_observation_space_dimension(self):
         # Return the dimension of the state

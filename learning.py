@@ -10,6 +10,15 @@ NUM_INPUT = 2
 GAMMA = 0.9 # Forgetting.
 TUNING = False  # If False, just use arbitrary, pre-selected params.
 
+nn_param = [128, 128]
+params = {
+    "batchSize": 64,
+    "buffer": 50000,
+    "nn": nn_param
+    }
+model = neural_net(NUM_INPUT, nn_param)
+train_net(model, params, environment, modelname)
+
 def train_net(model, params, environment, modelname="untitle", train_packets = 50000):
     filename = modelname #params_to_filename(params)
     observe = 1000  # Number of packets to observe before training.
@@ -17,28 +26,37 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
     train_packets = train_packets  # Number of packets to play.
     batchSize = params['batchSize']
     buffer = params['buffer']
+    distance = 0
 
     # max_distance = 0
     # istance = 0
     t = 0
     data_collect = []
-    loss_log = [] 
+    loss_log = []
 
     # # Assain environment State instance.
     env_state = environment
 
     # # Get initial state by doing nothing and getting the state.
-    # _, state, SAVE = game_state.run(0,"T")
+    _, state, SAVE = env_state.run(0,"T")
 
     # # Let's time it.
-    # start_time = timeit.default_timer()
+    start_time = timeit.default_timer()
 
     while (t < train_packets) and not env_state.exit:
-        pass
-
-
-
-
+        yield True
+        t += 1
+        distance += 1
+        # Choose an action.
+        if random.random() < epsilon or t < observe:
+            action = np.random.randint(0, 3)  # random
+        else:
+            # Get Q values for each action.
+            qval = model.predict(state, batch_size=1)
+            action = (np.argmax(qval))  # best
+        yield action
+        # Take action, observe new state and get our treat.
+        reward, new_state, SAVE = env_state.run(action,"T")
 
 def log_results(filename, data_collect, loss_log, istest = False):
     # Save the results to a file so we can graph it later.
@@ -146,3 +164,35 @@ def launch_learn(params,environment, modelname):
     else:
         print("Already tested.")
 
+def train(environment, modelname="untitle"):
+    if TUNING:
+        param_list = []
+        nn_params = [[164, 150], [256, 256],
+                     [512, 512], [1000, 1000]]
+        batchSizes = [40, 100, 400]
+        buffers = [10000, 50000]
+        for nn_param in nn_params:
+            for batchSize in batchSizes:
+                for buffer in buffers:
+                    params = {
+                        "batchSize": batchSize,
+                        "buffer": buffer,
+                        "nn": nn_param
+                    }
+                    param_list.append(params)
+
+        for param_set in param_list:
+            launch_learn(param_set, environment, modelname)
+    else:
+        nn_param = [128, 128]
+        params = {
+            "batchSize": 64,
+            "buffer": 50000,
+            "nn": nn_param
+        }
+        model = neural_net(NUM_INPUT, nn_param)
+        train_net(model, params, environment, modelname)
+
+if __name__ == "__main__":
+    environment = Environment.Environment()
+    train(environment, "untitle")
