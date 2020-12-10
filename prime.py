@@ -31,23 +31,22 @@ def handle_auth_error(ex):
     return response
 
 
-
 def analyser(f):
     """
         Determines if f is an attack
     """
+    
     @wraps(f)
     def decorated(*args, **kwargs):
-        if True:
+        print(args)
+        if False:
             raise Error({ "code": "flood_attack",
                         "description": "Identified as Flood Attack"}, 401)
-
         return f(*args, **kwargs)
     return decorated
 
-
 def is_prime(num):
-    if num > 1: 
+    if num > 1:
         for i in range(2, num//2):
             if (num % i) == 0:
                 return False
@@ -94,6 +93,7 @@ def get_factorial():
 @app.route("/")
 @analyser
 def get_sum_primes():
+    print(request.args.get('language'))
     try:
         num = int(request.args.get('num'))
     except TypeError:
