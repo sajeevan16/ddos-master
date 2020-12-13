@@ -38,7 +38,7 @@ def neural_net(num_sensors, params, load=''):
 
     # Output layer.
     model.add(Dense(2, init='lecun_uniform'))
-    model.add(Activation('tanh'))
+    model.add(Activation('sigmoid'))
 
     rms = RMSprop()
     model.compile(loss='mse', optimizer=rms)

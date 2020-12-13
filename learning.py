@@ -17,7 +17,6 @@ params = {
     "nn": nn_param
     }
 model = neural_net(NUM_INPUT, nn_param)
-train_net(model, params, environment, modelname)
 
 def train_net(model, params, environment, modelname="untitle", train_packets = 50000):
     filename = modelname #params_to_filename(params)
@@ -38,7 +37,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
     env_state = environment
 
     # # Get initial state by doing nothing and getting the state.
-    _, state, SAVE = env_state.run(0,"T")
+    _, state, SAVE = env_state.defender_run(0,"T")
 
     # # Let's time it.
     start_time = timeit.default_timer()
@@ -48,6 +47,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
         t += 1
         distance += 1
         # Choose an action.
+        print("TRAING METHOD")
         if random.random() < epsilon or t < observe:
             action = np.random.randint(0, 3)  # random
         else:
@@ -56,7 +56,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
             action = (np.argmax(qval))  # best
         yield action
         # Take action, observe new state and get our treat.
-        reward, new_state, SAVE = env_state.run(action,"T")
+        reward, new_state, SAVE = env_state.defender_run(action,"T")
 
 def log_results(filename, data_collect, loss_log, istest = False):
     # Save the results to a file so we can graph it later.
