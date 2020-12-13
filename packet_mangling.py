@@ -25,7 +25,9 @@ import socket
 
 def print_and_accept(pkt):
     print(pkt)
+    
     pkt.accept()
+    #pkt.drop()
 
 nfqueue = NetfilterQueue()
 nfqueue.bind(1, print_and_accept)
