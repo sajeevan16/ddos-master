@@ -4,6 +4,7 @@ from flask import jsonify
 import numpy as np
 import time
 import requests
+import datetime
 
 
 app = Flask(__name__)
@@ -21,14 +22,23 @@ def legtimate(num):
             pass
         f1 = open("result.txt", "a")
         try:
+            ct = datetime.datetime.now()
+            ts = ct.timestamp()
+
+            start = time.perf_counter()
             response = requests.get(url, timeout=1)
-            if(str(response.status_code) == '200'):
-                f1.write("1 ")
-            else:
-                f1.write("result.txt", "0 ")
+            elapsed = time.perf_counter() - start
+            
+            f1.write(str(ts) + " " + str(elapsed) + " ")
+            
+            #if(str(response.status_code) == '200'):
+                #f1.write(str(ts) + "," + str(elapsed) + " ")
+            #else:
+                #f1.write("result.txt", "0 ")
+                
             print(response.status_code)
         except requests.exceptions.RequestException as e:
-            f1.write("0 ")
+            f1.write(str(ts) + " " + str(1) + " ")
             print("fail")
         f1.close()
 
@@ -40,8 +50,9 @@ def result():
 
     f1 = open("result.txt", "r")
     result  = f1.read().split()
+    dictoanry = Convert(result)
     f1.close()
-    return jsonify(result)
+    return jsonify(dictoanry)
 
 
 @app.route('/clear')
@@ -49,6 +60,10 @@ def clear():
     f1 = open("result.txt", "w")
     f1.close()
     return "Done"
+
+def Convert(lst):
+    res_dct = {lst[i]: lst[i + 1] for i in range(0, len(lst), 2)}
+    return res_dct
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',debug = True)
