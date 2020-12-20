@@ -5,8 +5,9 @@ import csv
 from nn import neural_net, LossHistory
 import os.path
 import timeit
+import environment
 
-NUM_INPUT = 2
+NUM_INPUT = 2 #environment.Environment.defender_observation_space_dimension()
 GAMMA = 0.9 # Forgetting.
 TUNING = False  # If False, just use arbitrary, pre-selected params.
 
@@ -27,11 +28,12 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
     buffer = params['buffer']
     distance = 0
 
-    # max_distance = 0
+    max_distance = 0
     # istance = 0
     t = 0
     data_collect = []
     loss_log = []
+    replay = []
 
     # # Assain environment State instance.
     env_state = environment
@@ -49,14 +51,69 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
         # Choose an action.
         print("TRAING METHOD")
         if random.random() < epsilon or t < observe:
-            action = np.random.randint(0, 3)  # random
+            action = np.random.randint(0, 2)  # random
         else:
             # Get Q values for each action.
+            print(state)
             qval = model.predict(state, batch_size=1)
+            print(qval.shape)
             action = (np.argmax(qval))  # best
         yield action
         # Take action, observe new state and get our treat.
         reward, new_state, SAVE = env_state.defender_run(action,"T")
+                # Experience replay storage.
+        replay.append((state, action, reward, new_state))
+
+        # If we're done observing, start training.
+        if t > observe:
+
+            # If we've stored enough in our buffer, pop the oldest.
+            if len(replay) > buffer:
+                replay.pop(0)
+
+            # Randomly sample our experience replay memory
+            minibatch = random.sample(replay, batchSize)
+
+            # Get training values.
+            X_train, y_train = process_minibatch2(minibatch, model)
+
+            # Train the model on this batch.
+            history = LossHistory()
+            model.fit(
+                X_train, y_train, batch_size=batchSize,
+                nb_epoch=1, verbose=0, callbacks=[history]
+            )
+            loss_log.append(history.losses)
+
+        # Update the starting state with S'.
+        state = new_state
+
+        # Decrement epsilon over time.
+        if epsilon > 0.1 and t > observe:
+            epsilon -= (1.0/train_packets)
+            #print(epsilon, "epsilon")
+
+        # We died, so update stuff.
+        if reward < -75:
+            # Log the distance at this T.
+            data_collect.append([t, distance])
+
+            # Update max.
+            if distance > max_distance:
+                max_distance = distance
+
+            # Time it.
+            tot_time = timeit.default_timer() - start_time
+            fps = distance / tot_time
+
+            # Output some stuff so we can watch.
+            #print("Max: %d at %d\tepsilon %f\t(%d)\t%f fps" %(max_distance, t, epsilon, distance, fps))
+            Msg = ("TRAINING -     Epsilon Value : %f      Max Distance : %d      Last Distance : %d      Total Frams: %d      fps: %f" %(epsilon, max_distance, distance, t, fps))
+            print(Msg)
+            env_state.setMessage(Msg)
+            # Reset.
+            distance = 0
+            start_time = timeit.default_timer()
 
 def log_results(filename, data_collect, loss_log, istest = False):
     # Save the results to a file so we can graph it later.

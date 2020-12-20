@@ -1,0 +1,65 @@
+"192.172.8.1"
+
+virtualenv venv 
+source venv/bin/activate
+pip install -r requirements.txt
+pip freeze > requirements.txt
+
+
+###DOKER_UBUNTHU_INSTALL
+https://docs.docker.com/engine/install/debian/
+###
+
+sudo docker build -t sajeevan16/flaskapp:latest .
+sudo docker run -it -d -p 5000:5000 sajeevan16/flaskapp
+sudo docker run -it --network host sajeevan16/flaskapp
+
+docker stop 5138119c3e24
+
+docker tag 7fc11a36d071 sajeevan16/flaskapp:200731
+docker push sajeevan16/flaskapp:200731
+
+
+sudo docker images 	# dockers images 
+sudo docker ps 		# running dockers
+
+
+#ROUTER
+
+R1# 
+
+R1# config t
+R1(config)# int f0/0
+R1(config-if)# ip address 10.10.10.1 255.255.255.0
+R1(config-if)# no shut
+R1(config-if)# ip route 172.16.0.0 255.255.255.0 10.10.10.2
+
+ip route 0.0.0.0 0.0.0.0 192.168.100.25
+
+17
+#OSPF
+router ospf 1 
+do sh run | sec ospf
+network 192.168.0.0 0.0.255.255 area 0
+
+# FOR DNS
+config t
+ip domain-lookup
+ip name-server 8.8.8.8
+
+
+## Ubunthu Routing 
+sudo tunctl -t tap0 -u sajeev
+
+sudo ifconfig tap1 192.168.100.25 netmask 255.255.255.0 up 
+
+sudo iptables -t nat -A POSTROUTING -o wlp3s0 -j MASQUERADE
+sudo iptables -A FORWARD -i tap1 -j ACCEPT
+echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
+
+sudo ip route add 192.168.0.0/16 via 192.168.100.25 dev tap1
+
+sudo iptables -A OUTPUT -o tap1 -j NFQUEUE --queue-num 1
+
+prtgadmin
+IoPtAe($7(69Z7(Y
