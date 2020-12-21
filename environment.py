@@ -49,7 +49,7 @@ class Environment:
         self.clock.tick(self.ticks)
         reward = 10
 
-        ## GET AVAILABILTY LIST 
+        ## GET AVAILABILTY LIST
         
 
         ## State Data
@@ -58,7 +58,7 @@ class Environment:
         state = np.array([normalized_readings])
 
         # Calculate the reward
-        self.get_reward()
+        #self.get_reward()
         return reward, state, SAVE
 
     def get_reward(self):
