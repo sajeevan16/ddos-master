@@ -136,4 +136,5 @@ def api_is_prime():
     return Response(json.dumps(data), mimetype='application/json')
 
 
-app.run()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0',debug = True)

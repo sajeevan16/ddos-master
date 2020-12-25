@@ -12,6 +12,27 @@ RUN pip --no-cache-dir install -r requirements.txt
 COPY . /app
 
 EXPOSE 5000
-ENTRYPOINT [ "python" ] 
-CMD [ "Legitimate.py" ]
+# ENTRYPOINT [ "python" ]
+# CMD [ "legitimate.py" ]
 
+
+##################################################
+# FROM ubuntu:16.04
+# RUN apt-get update -y && apt-get install -y nmap
+# RUN apt-get install -y python3-pip python3-dev
+# RUN apt-get update -y && \
+#     apt-get install -y python-pip python-dev
+
+# WORKDIR /app
+
+# COPY ./requirements.txt /app/requirements.txt
+
+# RUN pip3 --no-cache-dir install -r requirements.txt
+
+# COPY . /app
+
+# EXPOSE 5000
+
+# ENTRYPOINT [ "python" ]
+
+# CMD [ "app.py" ]
