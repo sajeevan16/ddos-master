@@ -46,7 +46,7 @@ def legtimate(num):
             response = requests.get(url, timeout=1)
             elapsed = time.perf_counter() - start
             
-            f1.write(str(ts) + " " + str(elapsed) + " ")
+            f1.write(str(ts) + " " + str(elapsed)+ "\n")
             
             #if(str(response.status_code) == '200'):
                 #f1.write(str(ts) + "," + str(elapsed) + " ")
@@ -55,11 +55,12 @@ def legtimate(num):
                 
             print(response.status_code)
         except requests.exceptions.RequestException as e:
-            f1.write(str(ts) + " " + str(1) + " ")
+            f1.write(str(ts) + " " + str(-1) + "\n")
             print("fail")
         f1.close()
+        
+        lecetuer satae_dgersee e
 
-    
     return "Done"+str(num)
 
 

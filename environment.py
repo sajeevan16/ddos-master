@@ -9,6 +9,8 @@ import numpy as np
 import time
 import requests
 import datetime
+from telnetlib import Telnet
+import time
 
 class Environment:
     def __init__(self,Objects=[]):
@@ -27,6 +29,7 @@ class Environment:
         self.waiting_packets = []
         self.attacker_pcs = []
         self.legitimate_users = ["192.168.106.7"]
+        self.legitimate_users_port =  [5039]
 
     def reset(self, seed=0):
         pass
@@ -65,12 +68,50 @@ class Environment:
         delay = []
         ct = datetime.datetime.now()
         ts = ct.timestamp()
-        for ip in self.legitimate_users:
-            url = "http://"+ip+":5000/result"
-            print(url)
-            r = requests.get(url)
-            lr = r.json()
-            print(r)
+        reward = 0
+        for iport in self.legitimate_users_port:
+                try:
+                    tn = Telnet('localhost', iport)
+                    tn.write("tail -15 result.txt".encode('ascii') + b"\n")
+                    output = tn.read_until("#".encode('ascii'), timeout=0.1).decode('ascii').split('\n')
+                    
+                    for t in output[::-1]:
+                        try:
+                            if('tail' in t or '#' in t or len(t)<5):
+                                continue
+                            m,n = t.split()[:2]
+                            m,n = float(m),float(n)
+                            ts = datetime.datetime.now().timestamp()
+                            print("#######")
+                            print(m,n)
+                            print(ts)
+                            print("#######")
+                            if ts - m <1:
+                                print(ts,n,m,"UUUUUUUUUUUUU")
+                                delay.append((ts - m, n ))
+                                if (n==-1):
+                                    reward -= 100*abs(1-(ts-m))
+                                elif(0<n<1):
+                                    reward+= 100*abs(1-(ts-m))*math.exp(-5*n)
+                            else:
+                                break
+                        except Exception as e:
+                            print(e,"@@@@@@@",t)
+                            pass
+                    tn.close()
+                    print(delay)
+                    #tn.interact()
+                except ConnectionRefusedError:
+                    print("ConnectionRefusedError",iport,"############")
+                except Exception as e:
+                    print(e,iport,"$$$$$$$$$$$$")
+                finally:
+                    print("****************************")
+                    print(reward)
+                    print("****************************")
+                    if(len(delay)==0):
+                        return 0
+                    return reward/len(delay)
             
 
     def defender_observation_space_dimension(self):
