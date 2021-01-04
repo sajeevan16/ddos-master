@@ -82,12 +82,12 @@ class Environment:
                             m,n = t.split()[:2]
                             m,n = float(m),float(n)
                             ts = datetime.datetime.now().timestamp()
-                            print("#######")
-                            print(m,n)
-                            print(ts)
-                            print("#######")
+                            # print("#######")
+                            # print(m,n)
+                            # print(ts)
+                            # print("#######")
                             if ts - m <1:
-                                print(ts,n,m,"UUUUUUUUUUUUU")
+                                # print(ts,n,m,"UUUUUUUUUUUUU")
                                 delay.append((ts - m, n ))
                                 if (n==-1):
                                     reward -= 100*abs(1-(ts-m))
@@ -96,15 +96,15 @@ class Environment:
                             else:
                                 break
                         except Exception as e:
-                            print(e,"@@@@@@@",t)
+                            # print(e,"@@@@@@@",t)
                             pass
                     tn.close()
                     print(delay)
                     #tn.interact()
                 except ConnectionRefusedError:
-                    print("ConnectionRefusedError",iport,"############")
+                    print("ConnectionRefusedError",iport)
                 except Exception as e:
-                    print(e,iport,"$$$$$$$$$$$$")
+                    print(e,iport)
                 finally:
                     print("****************************")
                     print(reward)
