@@ -54,12 +54,11 @@ class Environment:
 
         ## GET AVAILABILTY LIST
         
-
         ## State Data
         packet_data = self.currentState
         normalized_readings = [(rx-20.0)/20.0 for rx in packet_data]
         state = np.array([normalized_readings])
-
+        
         # Calculate the reward
         #self.get_reward()
         return reward, state, SAVE

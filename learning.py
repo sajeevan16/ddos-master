@@ -17,6 +17,7 @@ params = {
     "buffer": 50000,
     "nn": nn_param
     }
+    
 model = neural_net(NUM_INPUT, nn_param)
 
 def train_net(model, params, environment, modelname="untitle", train_packets = 50000):
@@ -61,7 +62,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
         yield action
         # Take action, observe new state and get our treat.
         reward, new_state, SAVE = env_state.defender_run(action,"T")
-                # Experience replay storage.
+
         replay.append((state, action, reward, new_state))
 
         # If we're done observing, start training.
@@ -79,6 +80,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
 
             # Train the model on this batch.
             history = LossHistory()
+            print(X_train,y_train)
             model.fit(
                 X_train, y_train, batch_size=batchSize,
                 nb_epoch=1, verbose=0, callbacks=[history]

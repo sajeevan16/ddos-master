@@ -19,7 +19,8 @@ def init_interface(maintap = 'wlp3s0',tap = 'tap1', user='sajeev'):
 
 
 def add_netfilterqueue(): 
-    os.system("sudo iptables -A INPUT -j NFQUEUE --queue-num 1")
+    os.system("sudo iptables -A OUTPUT -o tap1 -j NFQUEUE --queue-num 1")
+
 
 def flushup_rules():
     os.system("sudo iptables -F")
