@@ -7,7 +7,7 @@ import os.path
 import timeit
 import environment
 
-NUM_INPUT = 2 #environment.Environment.defender_observation_space_dimension()
+NUM_INPUT = 12 #environment.Environment.defender_observation_space_dimension()
 GAMMA = 0.9 # Forgetting.
 TUNING = False  # If False, just use arbitrary, pre-selected params.
 
@@ -18,11 +18,11 @@ params = {
     "nn": nn_param
     }
     
-model = neural_net(NUM_INPUT, nn_param)
+# model = neural_net(NUM_INPUT, nn_param)
 
-def train_net(model, params, environment, modelname="untitle", train_packets = 50000):
+def train_net(model, params, environment, modelname="untitle", train_packets = 500):
     filename = modelname #params_to_filename(params)
-    observe = 1000  # Number of packets to observe before training.
+    observe = 100  # Number of packets to observe before training.
     epsilon = 1
     train_packets = train_packets  # Number of packets to play.
     batchSize = params['batchSize']
@@ -141,26 +141,39 @@ def process_minibatch2(minibatch, model):
     #   feed the whole batch is much more efficient
 
     mb_len = len(minibatch)
+    # print("mbl",mb_len)
 
-    old_states = np.zeros(shape=(mb_len, 3))
+    old_states = np.zeros(shape=(mb_len, 12))
     actions = np.zeros(shape=(mb_len,))
     rewards = np.zeros(shape=(mb_len,))
-    new_states = np.zeros(shape=(mb_len, 3))
+    new_states = np.zeros(shape=(mb_len, 12))
 
+    
     for i, m in enumerate(minibatch):
         old_state_m, action_m, reward_m, new_state_m = m
+        # print("oldstats", old_states)
+        # print("oldsold_state_m, action_m, reward_m, new_state_mtats", old_state_m.shape, action_m, reward_m, new_state_m.shape)
+        # print("i", i)
         old_states[i, :] = old_state_m[...]
         actions[i] = action_m
         rewards[i] = reward_m
         new_states[i, :] = new_state_m[...]
 
+    # print("old", old_states.shape)
+    # print("new", new_states.shape)
+
     old_qvals = model.predict(old_states, batch_size=mb_len)
     new_qvals = model.predict(new_states, batch_size=mb_len)
-
+    
     maxQs = np.max(new_qvals, axis=1)
     y = old_qvals
     non_term_inds = np.where(rewards > 0)[0]
     term_inds = np.where(rewards <= 0)[0]
+    print("term_inds,non_term_inds,y",term_inds,non_term_inds,y)
+    print("actions[non_term_inds]",actions[non_term_inds])
+    print("y[non_term_inds",y[non_term_inds,actions[non_term_inds].astype(int)])
+    print("rewards[non_term_inds]",rewards[non_term_inds])
+    print("maxQs[non_term_inds]",maxQs[non_term_inds])
 
     y[non_term_inds, actions[non_term_inds].astype(int)] = rewards[non_term_inds] + (GAMMA * maxQs[non_term_inds])
     y[term_inds, actions[term_inds].astype(int)] = rewards[term_inds]

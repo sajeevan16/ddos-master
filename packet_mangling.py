@@ -28,6 +28,7 @@ model = nn.neural_net(learning.NUM_INPUT, nn_param)
 learning_train = learning.train_net(model, params, env, "modelname")
 
 def feature_extention(packet):
+    return [0,0,0,0,0,0,0,0,0,0,0,0] #12
     temp = []
     # temp.append(str(packet.frame_info._all_fields["frame.encap_type"]) )#0
     # temp.append(str(packet.frame_info._all_fields["frame.len"])) #1
@@ -72,7 +73,8 @@ def feature_extention(packet):
     else:
         temp.extend(["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0",])
     print(temp)
-    return temp
+    # return temp
+    return [0,0,0,0,0,0,0,0,0,0,0,0] #12
 
 
 def send_403(pkt):
@@ -99,28 +101,30 @@ def analyzer(pkt):
     # print (packEth.show())
     # print("######## End ###########")
 
-    print("YYYYYYYYYYYYYYYYYYYY")
+    
     pkt_pl = pkt.get_payload()
     scapktIP = IP(pkt_pl)
-    print()
+    print("TTTT")
     if scapktIP.haslayer(TCP) and (scapktIP[TCP].flags & TCP_FLAGS['SYN']):
         print("Connection Estalishment.... ")
 
         #Feature selection
         state = feature_extention(scapktIP)
         env.setState(state)
+        print("YYYYYYYYYYYYYYYYYYYY")
         # RL 
         true = next(learning_train)
         res = next(learning_train)
-        print(true,res)
+        print("truePARRRRRRRRRRR",res)
         if (res == 1):
             #pkt.accept()
-            send_403(scapktIP)
+            # send_403(scapktIP)
             pkt.drop()
         else:
-            send_403(scapktIP)
-            pkt.drop()
+            # send_403(scapktIP)
+            pkt.accept()
     else:
+        print("Act")
         pkt.accept()
 
 nfqueue = NetfilterQueue()

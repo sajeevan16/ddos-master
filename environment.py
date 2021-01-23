@@ -24,7 +24,7 @@ class Environment:
         self.returnmenu = False
         self.dimension_of_state = 0
         self.dimension_of_action = 0
-        self.currentState = [0.1,0.3,0.5]
+        self.currentState = [0,0,0,0,0,0,0,0,0,0,0,0]
         self.currentRequest = ""
         self.waiting_packets = []
         self.attacker_pcs = []
