@@ -17,8 +17,8 @@ def print_and_accept(pkt):
     packIP = IP(pl)
     packEth = Ether(pl)
     
-    print (packIP.show())
-    print (packEth.show())
+    # print (packIP.show())
+    # print (packEth.show())
     
     #print (packIP.summary())
     

@@ -7,7 +7,7 @@ import os.path
 import timeit
 import environment
 
-NUM_INPUT = 12 #environment.Environment.defender_observation_space_dimension()
+NUM_INPUT = 23 #environment.Environment.defender_observation_space_dimension()
 GAMMA = 0.9 # Forgetting.
 TUNING = False  # If False, just use arbitrary, pre-selected params.
 
@@ -47,17 +47,18 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
 
     while (t < train_packets) and not env_state.exit:
         yield True
+        print(t)
         t += 1
         distance += 1
         # Choose an action.
-        print("TRAING METHOD")
+        # print("TRAING METHOD")
         if random.random() < epsilon or t < observe:
             action = np.random.randint(0, 2)  # random
         else:
             # Get Q values for each action.
-            print(state)
+            # print(state)
             qval = model.predict(state, batch_size=1)
-            print(qval.shape)
+            # print(qval.shape)
             action = (np.argmax(qval))  # best
         yield action
         # Take action, observe new state and get our treat.
@@ -80,7 +81,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
 
             # Train the model on this batch.
             history = LossHistory()
-            print(X_train,y_train)
+            # print(X_train,y_train)
             model.fit(
                 X_train, y_train, batch_size=batchSize,
                 nb_epoch=1, verbose=0, callbacks=[history]
@@ -143,10 +144,10 @@ def process_minibatch2(minibatch, model):
     mb_len = len(minibatch)
     # print("mbl",mb_len)
 
-    old_states = np.zeros(shape=(mb_len, 12))
+    old_states = np.zeros(shape=(mb_len, NUM_INPUT))
     actions = np.zeros(shape=(mb_len,))
     rewards = np.zeros(shape=(mb_len,))
-    new_states = np.zeros(shape=(mb_len, 12))
+    new_states = np.zeros(shape=(mb_len, NUM_INPUT))
 
     
     for i, m in enumerate(minibatch):
@@ -169,11 +170,11 @@ def process_minibatch2(minibatch, model):
     y = old_qvals
     non_term_inds = np.where(rewards > 0)[0]
     term_inds = np.where(rewards <= 0)[0]
-    print("term_inds,non_term_inds,y",term_inds,non_term_inds,y)
-    print("actions[non_term_inds]",actions[non_term_inds])
-    print("y[non_term_inds",y[non_term_inds,actions[non_term_inds].astype(int)])
-    print("rewards[non_term_inds]",rewards[non_term_inds])
-    print("maxQs[non_term_inds]",maxQs[non_term_inds])
+    # print("term_inds,non_term_inds,y",term_inds,non_term_inds,y)
+    # print("actions[non_term_inds]",actions[non_term_inds])
+    # print("y[non_term_inds",y[non_term_inds,actions[non_term_inds].astype(int)])
+    # print("rewards[non_term_inds]",rewards[non_term_inds])
+    # print("maxQs[non_term_inds]",maxQs[non_term_inds])
 
     y[non_term_inds, actions[non_term_inds].astype(int)] = rewards[non_term_inds] + (GAMMA * maxQs[non_term_inds])
     y[term_inds, actions[term_inds].astype(int)] = rewards[term_inds]
@@ -223,7 +224,7 @@ def params_to_filename(params):
 
 def launch_learn(params,environment, modelname):
     filename = modelname
-    print("Trying %s" % filename)
+    # print("Trying %s" % filename)
     # Make sure we haven't run this one.
     if not os.path.isfile('results/sonar-frames/loss_data-' + filename + '.csv'):
         # Create file so we don't double test when we run multiple

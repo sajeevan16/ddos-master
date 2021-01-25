@@ -9,7 +9,7 @@ def is_interface_up(interface):
 
 
 def init_interface(maintap = 'wlp3s0',tap = 'tap1', user='sajeev'):
-    print("Setiiii")
+    print("Settings for Network...")
     if(tap not in netifaces.interfaces()):
         os.system("sudo tunctl -t tap1 -u "+user) 
         # sudo tunctl -t tap1 -u sajeev

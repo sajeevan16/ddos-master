@@ -59,14 +59,12 @@ def legtimate(num):
             f1.write(str(ts) + " " + str(-1) + "\n")
             print("fail")
         f1.close()
-        
         lecetuer satae_dgersee e
 
     return "Done"+str(num)
 
 
 def result():
-
     f1 = open("result.txt", "r")
     result  = f1.read().split()
     dictoanry = Convert(result)
@@ -84,7 +82,7 @@ def Convert(lst):
     return res_dct
 
 if __name__ == '__main__':
-    #app.run(host='0.0.0.0',debug = True)
+    # app.run(host='0.0.0.0',debug = True)
     while True:
         try:
             legtimate(int(os_getenv('NUMPACK')))
