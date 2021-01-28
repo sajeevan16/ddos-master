@@ -24,7 +24,9 @@ class Environment:
         self.returnmenu = False
         self.dimension_of_state = 0
         self.dimension_of_action = 0
-        self.currentState = [0.1,0.3,0.5]
+        self.currentState = None
+        self.currentStateLabel = None
+        self.currentAction = None
         self.currentRequest = ""
         self.waiting_packets = []
         self.attacker_pcs = []
@@ -44,6 +46,12 @@ class Environment:
 
     def setState(self,state):
         self.currentState = state
+    
+    def setStateLabel(self,stateLabel):
+        self.currentStateLabel = stateLabel
+
+    def setAction(self,action):
+        self.currentAction = action
     
     def defender_run(self,act,Model):
         dt = self.clock.get_time() / 1000
@@ -112,7 +120,12 @@ class Environment:
                     if(len(delay)==0):
                         return 0
                     return reward/len(delay)
-            
+    
+    def reward_comparison(self):
+        if(self.currentStateLabel):
+
+
+
 
     def defender_observation_space_dimension(self):
         # Return the dimension of the state

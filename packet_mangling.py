@@ -110,6 +110,7 @@ def analyzer(pkt):
         state.append(0)
         state.append(0)
         env.setState(state)
+        env.setStateLabel(1)
         # RL 
         true = next(learning_train)
         res = next(learning_train)

@@ -58,6 +58,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
             qval = model.predict(state, batch_size=1)
             print(qval.shape)
             action = (np.argmax(qval))  # best
+        env_state.setcurrentAction(action)
         yield action
         # Take action, observe new state and get our treat.
         reward, new_state, SAVE = env_state.defender_run(action,"T")
