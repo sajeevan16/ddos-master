@@ -110,25 +110,19 @@ def analyzer(pkt):
         #Feature selection
         state = feature_extention(scapktIP)
         env.setState(state)
-        # print("YYYYYYYYYYYYYYYYYYYY")
-        # RL
-        # if(True):
-        try:
-            _true = next(learning_train)
-            res = next(learning_train)
-
-            # print("truePARRRRRRRRRRR",res)
-            if (res == 1):
-                #pkt.accept()
-                # send_403(scapktIP)
-                pkt.drop()
-            else:
-                # send_403(scapktIP)
-                pkt.accept()
-        except StopIteration:
-            settings.flushup_rules()
-            s.close()
-            nfqueue.unbind()
+        env.setStateLabel(1)
+        # RL 
+        true = next(learning_train)
+        res = next(learning_train)
+        print(true,res)
+        feature_extention(scapktIP)
+        if (res == 1):
+            #pkt.accept()
+            send_403(scapktIP)
+            pkt.drop()
+        else:
+            send_403(scapktIP)
+            pkt.drop()
     else:
         # print("No TCP SYN")
         pkt.accept()
