@@ -129,7 +129,7 @@ def api_is_prime():
                 'status':200,
                 'number': num,
                 'is_prime': is_prime(num),
-                'msg': str(num)+ ' is a prime number' if is_prime(num) else str(num)+ ' is a not prime number' 
+                'msg': str(num)+ ' is a prime number' if  (num) else str(num)+ ' is a not prime number' 
             }
         else:
             data = {'status':422, 'errormsg': 'Parameter num should grater than or equal to zreo'}
@@ -137,4 +137,4 @@ def api_is_prime():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',debug = True)
+    app.run(host='0.0.0.0',debug = True, port=5000)

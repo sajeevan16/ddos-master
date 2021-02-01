@@ -14,6 +14,7 @@ default_value = {
     "NUMPACK": 100,
     "LAMDBA": 1,
     "SHAPEA": 0.8,
+    "TIMEOUT": 10
 }
 
 
@@ -22,6 +23,7 @@ default_value = {
 # NUMPACK=100
 # LAMDBA=1
 # SHAPEA=0.8
+# TIMEOUT=10
 
 def os_getenv(KEY):
     return os.getenv(KEY, default_value[KEY])
@@ -38,13 +40,14 @@ def legtimate(num):
         target_time = time.perf_counter() + intervals[i]
         while time.perf_counter() < target_time:
             pass
+        # time.sleep(intervals[i])
         f1 = open("result.txt", "a")
         try:
             ct = datetime.datetime.now()
             ts = ct.timestamp()
 
             start = time.perf_counter()
-            response = requests.get(url, timeout=1)
+            response = requests.get(url, timeout=int(os_getenv('TIMEOUT')))
             elapsed = time.perf_counter() - start
             
             f1.write(str(ts) + " " + str(elapsed)+ "\n")
@@ -59,7 +62,7 @@ def legtimate(num):
             f1.write(str(ts) + " " + str(-1) + "\n")
             print("fail")
         f1.close()
-        lecetuer satae_dgersee e
+        # lecetuer satae_dgersee e
 
     return "Done"+str(num)
 

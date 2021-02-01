@@ -49,9 +49,8 @@ ip name-server 8.8.8.8
 
 
 ## Ubunthu Routing 
-sudo tunctl -t tap0 -u sajeev
-
-sudo ifconfig tap1 192.168.100.25 netmask 255.255.255.0 up 
+sudo tunctl -t tap1 -u sajeev
+sudo ifconfig tap1 192.168.100.25 netmask 255.255.255.0 up
 
 sudo iptables -t nat -A POSTROUTING -o wlp3s0 -j MASQUERADE
 sudo iptables -A FORWARD -i tap1 -j ACCEPT
@@ -61,6 +60,32 @@ sudo ip route add 192.168.0.0/16 via 192.168.100.25 dev tap1
 
 sudo iptables -A OUTPUT -o tap1 -j NFQUEUE --queue-num 1
 
+
+
 prtgadmin
 IoPtAe($7(69Z7(Y
 
+
+python3 legitimate.py 
+
+python pyddos1.py -d "192.168.1.103" -p "5000" -T 10 -Synflood
+
+
+
+
+#
+# This is a sample network config uncomment lines to configure the network
+#
+
+
+# Static config for eth0
+auto eth0
+iface eth0 inet static
+	address 192.168.106.2
+	netmask 255.255.255.0
+	gateway 192.168.106.1
+	up echo nameserver 192.168.106.1 > /etc/resolv.conf
+
+# DHCP config for eth0
+# auto eth0
+# iface eth0 inet dhcp

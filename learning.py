@@ -5,7 +5,10 @@ import csv
 from nn import neural_net, LossHistory
 import os.path
 import timeit
+import csv
 import environment
+from numpy import savetxt
+import settings
 
 NUM_INPUT = 23 #environment.Environment.defender_observation_space_dimension()
 GAMMA = 0.9 # Forgetting.
@@ -20,16 +23,16 @@ params = {
     
 # model = neural_net(NUM_INPUT, nn_param)
 
-def train_net(model, params, environment, modelname="untitle", train_packets = 500):
+def train_net(model, params, environment, modelname="untitle", train_packets = 5000):
     filename = modelname #params_to_filename(params)
-    observe = 100  # Number of packets to observe before training.
+    observe = 2000  # Number of packets to observe before training.
     epsilon = 1
     train_packets = train_packets  # Number of packets to play.
     batchSize = params['batchSize']
     buffer = params['buffer']
-    distance = 0
+    stateid = 0
 
-    max_distance = 0
+    max_stateid = 0
     # istance = 0
     t = 0
     data_collect = []
@@ -40,7 +43,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
     env_state = environment
 
     # # Get initial state by doing nothing and getting the state.
-    _, state, SAVE = env_state.defender_run(0,"T")
+    _, state, _SAVE = env_state.defender_run(0,"T")
 
     # # Let's time it.
     start_time = timeit.default_timer()
@@ -49,21 +52,28 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
         yield True
         print(t)
         t += 1
-        distance += 1
+        stateid += 1
+        
+        env_state.setStateId(stateid)
         # Choose an action.
         # print("TRAING METHOD")
+        rm=""
+        settings.attacker_controller(env_state.attackers_port,env_state.state_id)
         if random.random() < epsilon or t < observe:
             action = np.random.randint(0, 2)  # random
+            rm="R"
         else:
+            rm="M"
             # Get Q values for each action.
             # print(state)
             qval = model.predict(state, batch_size=1)
             # print(qval.shape)
             action = (np.argmax(qval))  # best
-        env_state.setcurrentAction(action)
+        env_state.setAction(action)
         yield action
         # Take action, observe new state and get our treat.
         reward, new_state, SAVE = env_state.defender_run(action,"T")
+        print("LABEL: ",int(action),int(env_state.currentStateLabel),"Reward: ", reward,rm)
 
         replay.append((state, action, reward, new_state))
 
@@ -99,25 +109,61 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
 
         # We died, so update stuff.
         if reward < -75:
-            # Log the distance at this T.
-            data_collect.append([t, distance])
+            # Log the stateid at this T.
+            data_collect.append([t, stateid])
 
             # Update max.
-            if distance > max_distance:
-                max_distance = distance
+            if stateid > max_stateid:
+                max_stateid = stateid
 
             # Time it.
             tot_time = timeit.default_timer() - start_time
-            fps = distance / tot_time
+            fps = stateid / tot_time
 
             # Output some stuff so we can watch.
-            #print("Max: %d at %d\tepsilon %f\t(%d)\t%f fps" %(max_distance, t, epsilon, distance, fps))
-            Msg = ("TRAINING -     Epsilon Value : %f      Max Distance : %d      Last Distance : %d      Total Frams: %d      fps: %f" %(epsilon, max_distance, distance, t, fps))
+            #print("Max: %d at %d\tepsilon %f\t(%d)\t%f fps" %(max_stateid, t, epsilon, stateid, fps))
+            Msg = ("TRAINING -     Epsilon Value : %f      Max stateid : %d      Last stateid : %d      Total Frams: %d      fps: %f" %(epsilon, max_stateid, stateid, t, fps))
             print(Msg)
             env_state.setMessage(Msg)
             # Reset.
-            distance = 0
             start_time = timeit.default_timer()
+
+        if t % 500 == 0:
+
+            SAVE = False
+            env_state.setMessage("Last Save at "+str(t))
+            model.save_weights('saved-models/' + filename +'.h5',overwrite=True)
+            print("Saving model %s - %d" % (filename, t))
+    
+    # Log results after we're done all frames.
+    log_results(filename, data_collect, loss_log)
+    with open(filename+'_test_data.csv', 'a')  as _document: pass
+    test_y,test_y1 = [],[]
+    while(1):
+        yield True
+        stateid=+1
+        print(stateid)
+        settings.attacker_controller(env_state.attackers_port,env_state.state_id)
+        env_state.setStateId(stateid)
+        _, state, _ = env_state.defender_run(action,"P")
+        qval = model.predict(state, batch_size=1)
+        action = (np.argmax(qval))
+        state_data =  np.insert(state, 0, stateid)
+        state_data = np.append(state_data, action)
+        state_data = np.append(state_data, env_state.currentStateLabel)
+        test_y.append(int(env_state.currentStateLabel))
+        test_y1.append(int(action))
+
+        print("LABEL: ",int(action),int(env_state.currentStateLabel))
+        ac = sum(1 for x,y in zip(test_y,test_y1) if x == y) / float(len(test_y))
+        print("accuracy",ac)
+        # print(state_data[-2:])
+        with open(filename+'_test_data.csv', 'a') as file:
+            np.savetxt(file, state_data, delimiter=",")
+        yield action
+        
+
+
 
 def log_results(filename, data_collect, loss_log, istest = False):
     # Save the results to a file so we can graph it later.

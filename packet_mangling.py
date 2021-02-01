@@ -9,7 +9,7 @@ import os, netifaces, socket, struct
 import pyshark
 
 from settings import TCP_FLAGS
-
+import numpy as np
 
 settings.init_interface()
 settings.add_netfilterqueue()
@@ -34,7 +34,6 @@ def feature_extention(packet):
     # temp.append(str(packet.frame_info._all_fields["frame.len"])) #1
     # temp.append(str(packet.frame_info._all_fields["frame.protocols"])) #2
     # IP(packet).show()
-    
     if packet.haslayer(IP):
         temp.append(int(packet[IP].ihl))#3 hdr_len
         temp.append(int(packet[IP].len))#4 len
@@ -44,6 +43,7 @@ def feature_extention(packet):
         temp.append(int(packet[IP].frag))#8 frag_offset
         temp.append(int(packet[IP].ttl))#9 ttl
         temp.append(int(packet[IP].proto))#10 proto
+        
         # temp.append(int(packet[IP].src))#10 src
         # temp.append(int(packet[IP].dst))#11 dst
     else:
@@ -52,9 +52,9 @@ def feature_extention(packet):
         
         temp.append(int(packet[TCP].sport))#12 tcp.srcport
         temp.append(int(packet[TCP].dport))#13 tcp.dstport
-        temp.append(int(packet[TCP].seq))#14 tcp.len
+        # temp.append(int(packet[TCP].seq))#14 tcp.len
         temp.append(int(packet[TCP].ack))#15 tcp.-ack
-
+        
         temp.append(int(packet[TCP].flags & TCP_FLAGS['RST']))#16 tcp.flags.res
         temp.append(int(packet[TCP].flags & TCP_FLAGS['SYN']))#17 tcp.flags.ns
         temp.append(int(packet[TCP].flags & TCP_FLAGS['CWR']))#18 tcp.flags.cwr
@@ -70,10 +70,34 @@ def feature_extention(packet):
     #temp.append(packet.tcp._all_fields['tcp.analysis.push_bytes_sent'])
         # temp.append(int(packet.tcp._all_fields['tcp.time_delta']))#27
     else:
-        temp.extend([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
-    print(temp)
+        temp.extend([0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+    
+    label = get_payload_pkt(packet)
+    
     # return temp
-    return temp #12
+    temp = adversarial_noise(temp,0.1)
+    temp.append(int(label))
+    print(temp)
+    return temp,label #12
+
+
+def adversarial_noise(arr,r=0.2):
+    tempa = np.array(arr)
+    noise = np.random.normal(0,r, tempa.shape)
+    temp4p = np.array(arr)
+    temp4p[temp4p == 0] = 1
+    noise *= temp4p
+    return list(tempa+noise)
+
+
+
+def get_payload_pkt(packet):
+    l=0
+    if packet.haslayer(IP):
+        l = not str(packet[IP].src).startswith(settings.LOCAL_NET_SUB)
+        # Legitimate - 0
+        # Attack - 1
+    return l
 
 
 def send_403(pkt):
@@ -104,25 +128,25 @@ def analyzer(pkt):
     pkt_pl = pkt.get_payload()
     scapktIP = IP(pkt_pl)
     # print("TTTT")
+    # state,label = feature_extention(scapktIP)
+    # print(state)
     if scapktIP.haslayer(TCP) and (scapktIP[TCP].flags & TCP_FLAGS['SYN']):
         # print("Connection Estalishment.... ")
 
         #Feature selection
-        state = feature_extention(scapktIP)
+        state,label = feature_extention(scapktIP)
         env.setState(state)
-        env.setStateLabel(1)
+        env.setStateLabel(label)
         # RL 
         true = next(learning_train)
         res = next(learning_train)
-        print(true,res)
-        feature_extention(scapktIP)
+        # print(true,res)
+        # feature_extention(scapktIP)
         if (res == 1):
             #pkt.accept()
-            send_403(scapktIP)
             pkt.drop()
         else:
-            send_403(scapktIP)
-            pkt.drop()
+            pkt.accept()
     else:
         # print("No TCP SYN")
         pkt.accept()

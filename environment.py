@@ -25,13 +25,16 @@ class Environment:
         self.dimension_of_state = 0
         self.dimension_of_action = 0
         self.currentState = None
-        self.currentStateLabel = None
-        self.currentAction = None
+        self.currentStateLabel = 0
+        self.currentAction = 0
         self.currentRequest = ""
         self.waiting_packets = []
         self.attacker_pcs = []
         self.legitimate_users = ["192.168.106.78"]
         self.legitimate_users_port =  [5032]
+        self.attackers = ["192.168.106.78"]
+        self.attackers_port =  [5010]
+        self.state_id = 0
 
     def reset(self, seed=0):
         pass
@@ -53,6 +56,12 @@ class Environment:
     def setAction(self,action):
         self.currentAction = action
     
+    def setMessage(self,mesg):
+        self.message = mesg
+
+    def setStateId(self,id):
+        self.state_id = id
+    
     def defender_run(self,act,Model):
         dt = self.clock.get_time() / 1000
         self.distance += 1
@@ -68,7 +77,7 @@ class Environment:
         state = np.array([normalized_readings])
         
         # Calculate the reward
-        reward = self.get_reward()
+        reward = self.reward_comparison()
         return reward, state, SAVE
 
     def get_reward(self):
@@ -121,10 +130,13 @@ class Environment:
                     return reward/len(delay)
     
     def reward_comparison(self):
-        if(self.currentStateLabel):
-
-
-
+        # Legitimate - 0
+        # Attack - 1
+        if(int(self.currentStateLabel) == int(self.currentAction)):
+            compare_reward = 100
+        else:
+            compare_reward = -100
+        return compare_reward
 
     def defender_observation_space_dimension(self):
         # Return the dimension of the state
@@ -137,6 +149,6 @@ class Environment:
 
 if __name__ == '__main__':
     environment = Environment()
-    while not game.exit:
+    while not environment.exit:
         environment.defender_run(1,"S")
 
