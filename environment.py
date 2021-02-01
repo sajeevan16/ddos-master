@@ -24,12 +24,14 @@ class Environment:
         self.returnmenu = False
         self.dimension_of_state = 0
         self.dimension_of_action = 0
-        self.currentState = [0.1,0.3,0.5]
+        self.currentState = None
+        self.currentStateLabel = None
+        self.currentAction = None
         self.currentRequest = ""
         self.waiting_packets = []
         self.attacker_pcs = []
-        self.legitimate_users = ["192.168.106.7"]
-        self.legitimate_users_port =  [5039]
+        self.legitimate_users = ["192.168.106.78"]
+        self.legitimate_users_port =  [5032]
 
     def reset(self, seed=0):
         pass
@@ -45,6 +47,12 @@ class Environment:
     def setState(self,state):
         self.currentState = state
     
+    def setStateLabel(self,stateLabel):
+        self.currentStateLabel = stateLabel
+
+    def setAction(self,action):
+        self.currentAction = action
+    
     def defender_run(self,act,Model):
         dt = self.clock.get_time() / 1000
         self.distance += 1
@@ -54,14 +62,13 @@ class Environment:
 
         ## GET AVAILABILTY LIST
         
-
         ## State Data
         packet_data = self.currentState
         normalized_readings = [(rx-20.0)/20.0 for rx in packet_data]
         state = np.array([normalized_readings])
-
+        
         # Calculate the reward
-        #self.get_reward()
+        reward = self.get_reward()
         return reward, state, SAVE
 
     def get_reward(self):
@@ -89,30 +96,35 @@ class Environment:
                             if ts - m <1:
                                 # print(ts,n,m,"UUUUUUUUUUUUU")
                                 delay.append((ts - m, n ))
-                                if (n==-1):
-                                    reward -= 100*abs(1-(ts-m))
-                                elif(0<n<1):
+                                if(0<n<1):
                                     reward+= 100*abs(1-(ts-m))*math.exp(-5*n)
+                            elif (n==1):
+                                reward -= 100*abs(1-(ts-m))
                             else:
                                 break
                         except Exception as e:
                             # print(e,"@@@@@@@",t)
                             pass
                     tn.close()
-                    print(delay)
+                    # print(delay)
                     #tn.interact()
                 except ConnectionRefusedError:
-                    print("ConnectionRefusedError",iport)
+                    print("Error:  ConnectionRefusedError",iport)
                 except Exception as e:
-                    print(e,iport)
+                    print("Error ",e,iport)
                 finally:
-                    print("****************************")
-                    print(reward)
-                    print("****************************")
+                    # print("****************************")
+                    print("reward: ",reward)
+                    # print("****************************")
                     if(len(delay)==0):
                         return 0
                     return reward/len(delay)
-            
+    
+    def reward_comparison(self):
+        if(self.currentStateLabel):
+
+
+
 
     def defender_observation_space_dimension(self):
         # Return the dimension of the state
@@ -124,6 +136,7 @@ class Environment:
 
 
 if __name__ == '__main__':
-    game = Environment()
+    environment = Environment()
     while not game.exit:
-        game.defender_run(1,"S")
+        environment.defender_run(1,"S")
+

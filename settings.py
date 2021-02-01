@@ -9,17 +9,21 @@ def is_interface_up(interface):
 
 
 def init_interface(maintap = 'wlp3s0',tap = 'tap1', user='sajeev'):
+    print("Settings for Network...")
     if(tap not in netifaces.interfaces()):
-        os.system("sudo tunctl -t tap1 -u "+user)
+        os.system("sudo tunctl -t tap1 -u "+user) 
+        # sudo tunctl -t tap1 -u sajeev
         os.system("sudo ifconfig tap1 192.168.100.25 netmask 255.255.255.0 up")
         os.system("sudo iptables -t nat -A POSTROUTING -o "+maintap+" -j MASQUERADE")
+        # sudo iptables -t nat -A POSTROUTING -o wlp3s0 -j MASQUERADE
         os.system("sudo iptables -A FORWARD -i tap1 -j ACCEPT")
         os.system("echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward")
         os.system("sudo ip route add 192.168.0.0/16 via 192.168.100.25 dev tap1")
 
 
 def add_netfilterqueue(): 
-    os.system("sudo iptables -A INPUT -j NFQUEUE --queue-num 1")
+    os.system("sudo iptables -A OUTPUT -o tap1 -j NFQUEUE --queue-num 1")
+
 
 def flushup_rules():
     os.system("sudo iptables -F")

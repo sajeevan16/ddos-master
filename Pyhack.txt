@@ -64,13 +64,3 @@ sudo iptables -A OUTPUT -o tap1 -j NFQUEUE --queue-num 1
 prtgadmin
 IoPtAe($7(69Z7(Y
 
-3C:A0:67:69:93:5D  - Ubunthu
-88:10:8F:25:C2:B8 - hu
-DC:EF:CA:6F:14:63 Amma
-
-10:98:C3:2A:19:4B Ge-mobile
-
-00:C3:A1:11:10:E7 Sumsung bolcked
-
-90:8D:6C:2B:A2:F2 Apple
-FC:F8:AE:81:63:CA Ge-lap

@@ -44,4 +44,5 @@ def neural_net(num_sensors, params, load=''):
     model.compile(loss='mse', optimizer=rms)
     if load:
         model.load_weights(load)
+    print(model.summary())
     return model

