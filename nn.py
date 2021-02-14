@@ -9,6 +9,8 @@ from keras.optimizers import RMSprop
 from keras.layers.recurrent import LSTM
 from keras.callbacks import Callback
 
+from keras.layers import Bidirectional
+
 
 class LossHistory(Callback):
     def on_train_begin(self, logs={}):
@@ -17,30 +19,33 @@ class LossHistory(Callback):
     def on_batch_end(self, batch, logs={}):
         self.losses.append(logs.get('loss'))
 
-# nn_params = [[164, 150], [256, 256],
-#                      [512, 512], [1000, 1000]]
-# nn_param = [128, 128], 
+NUM_INPUT = 23
+nn_param = [64, 128,128,128]
+params = {
+    "batchSize": 64,
+    "buffer": 50000,
+    "window": 100,
+    "nn": nn_param
+    }
 
-def neural_net(num_sensors, params, load=''):
+def neural_net(num_features, window, params, load=''):
     model = Sequential()
     
+
     # First layer.
-    model.add(Dense(
-        params[0], init='lecun_uniform', input_shape=(num_sensors,)
-    ))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.2))
+    model.add(Bidirectional(LSTM(params[0], activation='tanh', kernel_regularizer='l2', return_sequences=False),input_shape=(window, num_features)))
+
 
     # hidden layer.
     model.add(Dense(params[1], init='lecun_uniform'))
     model.add(Activation('relu'))
     model.add(Dropout(0.2))
 
-    model.add(Dense(params[1], init='lecun_uniform'))
+    model.add(Dense(params[2], init='lecun_uniform'))
     model.add(Activation('relu'))
     model.add(Dropout(0.2))
 
-    model.add(Dense(params[1], init='lecun_uniform'))
+    model.add(Dense(params[3], init='lecun_uniform'))
     model.add(Activation('relu'))
     model.add(Dropout(0.2))
 
@@ -49,7 +54,9 @@ def neural_net(num_sensors, params, load=''):
     model.add(Activation('sigmoid'))
 
     rms = RMSprop()
+   
     model.compile(loss='mse', optimizer=rms)
+    # model.build((window, num_features)) 
     if load:
         model.load_weights(load)
     print(model.summary())

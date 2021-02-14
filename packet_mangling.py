@@ -15,17 +15,10 @@ settings.init_interface()
 settings.add_netfilterqueue()
 
 env = Environment()
-nn_param = [128, 128]
 
-params = {
-    "batchSize": 64,
-    "buffer": 50000,
-    "nn": nn_param
-}
+model = nn.neural_net(learning.NUM_INPUT, learning.params['window'], learning.params['nn'])
 
-model = nn.neural_net(learning.NUM_INPUT, nn_param)
-
-learning_train = learning.train_net(model, params, env, "modelname")
+learning_train = learning.train_net(model, learning.params, env, "modelname")
 
 def feature_extention(packet):
     # return [0,0,0,0,0,0,0,0,0,0,0,0] #12
@@ -140,12 +133,12 @@ def analyzer(pkt):
 
         #Feature selection
         state,label = feature_extention(scapktIP)
-        env.setState(state)
+        env.addStateBuffer(state)
         env.setStateLabel(label)
         # RL 
         true = next(learning_train)
         res = next(learning_train)
-        res = papams_value(int(label))
+
         # print(true,res)
         # feature_extention(scapktIP)
         if (res == 1):
@@ -154,14 +147,15 @@ def analyzer(pkt):
         else:
             pkt.accept()
     else:
-        state,label = feature_extention(scapktIP)
-        res = papams_value(int(label))
-        # print("No TCP SYN")
-        if (res == 1):
-            #pkt.accept()
-            pkt.drop()
-        else:
-            pkt.accept()
+        pkt.accept()
+        # state,label = feature_extention(scapktIP)
+        # res = papams_value(int(label))
+        # # print("No TCP SYN")
+        # if (res == 1):
+        #     #pkt.accept()
+        #     pkt.drop()
+        # else:
+        #     pkt.accept()
 
 nfqueue = NetfilterQueue()
 nfqueue.bind(1, analyzer)

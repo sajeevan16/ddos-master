@@ -14,10 +14,11 @@ NUM_INPUT = 23 #environment.Environment.defender_observation_space_dimension()
 GAMMA = 0.9 # Forgetting.
 TUNING = False  # If False, just use arbitrary, pre-selected params.
 
-nn_param = [128, 128]
+nn_param = [64, 128,128,128]
 params = {
     "batchSize": 64,
     "buffer": 50000,
+    "window": 100,
     "nn": nn_param
     }
     
@@ -53,7 +54,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
         print(t)
         t += 1
         stateid += 1
-        
+
         env_state.setStateId(stateid)
         # Choose an action.
         # print("TRAING METHOD")
@@ -129,7 +130,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
             start_time = timeit.default_timer()
 
         if t % 500 == 0:
-            
+
             SAVE = False
             env_state.setMessage("Last Save at "+str(t))
             model.save_weights('saved-models/' + filename +'.h5',overwrite=True)
@@ -191,15 +192,16 @@ def process_minibatch2(minibatch, model):
     mb_len = len(minibatch)
     # print("mbl",mb_len)
 
-    old_states = np.zeros(shape=(mb_len, NUM_INPUT))
+    old_states = np.zeros(shape=(mb_len, params['window'], NUM_INPUT))
     actions = np.zeros(shape=(mb_len,))
     rewards = np.zeros(shape=(mb_len,))
-    new_states = np.zeros(shape=(mb_len, NUM_INPUT))
+    new_states = np.zeros(shape=(mb_len,params['window'], NUM_INPUT))
 
     
     for i, m in enumerate(minibatch):
         old_state_m, action_m, reward_m, new_state_m = m
         # print("oldstats", old_states)
+
         # print("oldsold_state_m, action_m, reward_m, new_state_mtats", old_state_m.shape, action_m, reward_m, new_state_m.shape)
         # print("i", i)
         old_states[i, :] = old_state_m[...]
@@ -207,9 +209,11 @@ def process_minibatch2(minibatch, model):
         rewards[i] = reward_m
         new_states[i, :] = new_state_m[...]
 
-    # print("old", old_states.shape)
-    # print("new", new_states.shape)
-
+    print("old", old_states.shape)
+    print("new", new_states.shape)
+    
+    # old_states = [[[s]*100][0] for s in old_states] 
+    # new_states =[[[s]*100][0] for s in new_states] 
     old_qvals = model.predict(old_states, batch_size=mb_len)
     new_qvals = model.predict(new_states, batch_size=mb_len)
     
@@ -280,7 +284,7 @@ def launch_learn(params,environment, modelname):
         open('results/sonar-frames/loss_data-' + filename + '.csv', 'a').close()
         print("Starting test.")
         # Train.
-        model = neural_net(NUM_INPUT, params['nn'])
+        model = neural_net(NUM_INPUT, params['window'],params['nn'])
         train_net(model, params, environment, modelname)
     else:
         print("Already tested.")
@@ -311,7 +315,7 @@ def train(environment, modelname="untitle"):
             "buffer": 50000,
             "nn": nn_param
         }
-        model = neural_net(NUM_INPUT, nn_param)
+        model = neural_net(NUM_INPUT,params['window'], nn_param)
         train_net(model, params, environment, modelname)
 
 if __name__ == "__main__":

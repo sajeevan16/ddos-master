@@ -11,6 +11,7 @@ import requests
 import datetime
 from telnetlib import Telnet
 import time
+import learning
 
 class Environment:
     def __init__(self,Objects=[]):
@@ -35,9 +36,14 @@ class Environment:
         self.attackers = ["192.168.106.78"]
         self.attackers_port =  [5010]
         self.state_id = 0
+        self.statebuffer = [[[0]*learning.NUM_INPUT]*learning.params['window']][0]
 
     def reset(self, seed=0):
         pass
+
+    def addStateBuffer(self, state):
+        self.statebuffer.append(state)
+        self.statebuffer.pop(0)
 
     # def defender_step(self, action):
     #     done = False
@@ -71,8 +77,10 @@ class Environment:
         ## GET AVAILABILTY LIST
         
         ## State Data
-        packet_data = self.currentState
-        normalized_readings = [(rx-20.0)/20.0 for rx in packet_data]
+        packet_data = self.statebuffer
+
+        normalized_readings = [[(rx-20.0)/20.0 for rx in y] for y in packet_data]
+        # [(rx-20.0)/20.0 for rx in packet_data]
         state = np.array([normalized_readings])
         
         # Calculate the reward

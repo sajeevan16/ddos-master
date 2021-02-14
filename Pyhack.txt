@@ -49,17 +49,18 @@ ip name-server 8.8.8.8
 
 
 ## Ubunthu Routing 
+
 sudo tunctl -t tap1 -u sajeev
 sudo ifconfig tap1 192.168.100.25 netmask 255.255.255.0 up
 
 sudo iptables -t nat -A POSTROUTING -o wlp3s0 -j MASQUERADE
 sudo iptables -A FORWARD -i tap1 -j ACCEPT
 echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward
-
 sudo ip route add 192.168.0.0/16 via 192.168.100.25 dev tap1
 
+###############
 sudo iptables -A OUTPUT -o tap1 -j NFQUEUE --queue-num 1
-
+sudo iptables -F
 
 
 prtgadmin
