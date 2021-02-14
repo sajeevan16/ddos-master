@@ -42,6 +42,7 @@ TCP_FLAGS = {
 LOCAL_NET_SUB = "192.168"
 
 def start_legitimate_user(legitimate_users_port):
+    legitimate_users_port = [5041, 5002, 5004, ]
     for iport in legitimate_users_port:
         try:
             tn = Telnet('localhost', iport)

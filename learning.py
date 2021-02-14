@@ -25,8 +25,8 @@ params = {
 
 def train_net(model, params, environment, modelname="untitle", train_packets = 5000):
     filename = modelname #params_to_filename(params)
-    observe = 2000  # Number of packets to observe before training.
-    epsilon = 1
+    observe = 1000  # Number of packets to observe before training.
+    epsilon = 1 
     train_packets = train_packets  # Number of packets to play.
     batchSize = params['batchSize']
     buffer = params['buffer']
@@ -58,7 +58,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
         # Choose an action.
         # print("TRAING METHOD")
         rm=""
-        settings.attacker_controller(env_state.attackers_port,env_state.state_id)
+        # settings.attacker_controller(env_state.attackers_port,env_state.state_id)
         if random.random() < epsilon or t < observe:
             action = np.random.randint(0, 2)  # random
             rm="R"
@@ -129,7 +129,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
             start_time = timeit.default_timer()
 
         if t % 500 == 0:
-
+            
             SAVE = False
             env_state.setMessage("Last Save at "+str(t))
             model.save_weights('saved-models/' + filename +'.h5',overwrite=True)
@@ -143,7 +143,7 @@ def train_net(model, params, environment, modelname="untitle", train_packets = 5
         yield True
         stateid=+1
         print(stateid)
-        settings.attacker_controller(env_state.attackers_port,env_state.state_id)
+        # settings.attacker_controller(env_state.attackers_port,env_state.state_id)
         env_state.setStateId(stateid)
         _, state, _ = env_state.defender_run(action,"P")
         qval = model.predict(state, batch_size=1)
@@ -269,6 +269,7 @@ def params_to_filename(params):
             str(params['batchSize']) + '-' + str(params['buffer'])
 
 
+
 def launch_learn(params,environment, modelname):
     filename = modelname
     # print("Trying %s" % filename)
@@ -316,3 +317,5 @@ def train(environment, modelname="untitle"):
 if __name__ == "__main__":
     environment = Environment.Environment()
     train(environment, "untitle")
+
+

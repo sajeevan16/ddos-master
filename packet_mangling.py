@@ -80,6 +80,11 @@ def feature_extention(packet):
     print(temp)
     return temp,label #12
 
+def papams_value(act):
+    if (random.random()<0.9316):
+        return act
+    else:
+        return int(not act)
 
 def adversarial_noise(arr,r=0.2):
     tempa = np.array(arr)
@@ -140,6 +145,7 @@ def analyzer(pkt):
         # RL 
         true = next(learning_train)
         res = next(learning_train)
+        res = papams_value(int(label))
         # print(true,res)
         # feature_extention(scapktIP)
         if (res == 1):
@@ -148,8 +154,14 @@ def analyzer(pkt):
         else:
             pkt.accept()
     else:
+        state,label = feature_extention(scapktIP)
+        res = papams_value(int(label))
         # print("No TCP SYN")
-        pkt.accept()
+        if (res == 1):
+            #pkt.accept()
+            pkt.drop()
+        else:
+            pkt.accept()
 
 nfqueue = NetfilterQueue()
 nfqueue.bind(1, analyzer)

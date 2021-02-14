@@ -31,7 +31,7 @@ class Environment:
         self.waiting_packets = []
         self.attacker_pcs = []
         self.legitimate_users = ["192.168.106.78"]
-        self.legitimate_users_port =  [5032]
+        self.legitimate_users_port =  [5032,5034,5003,5007,5031,5042,5009,5015,5005,5041,5023,5046,5022,5017,5026,5013,5011,5008]
         self.attackers = ["192.168.106.78"]
         self.attackers_port =  [5010]
         self.state_id = 0
@@ -67,7 +67,6 @@ class Environment:
         self.distance += 1
         SAVE = False
         self.clock.tick(self.ticks)
-        reward = 10
 
         ## GET AVAILABILTY LIST
         
@@ -106,7 +105,7 @@ class Environment:
                                 # print(ts,n,m,"UUUUUUUUUUUUU")
                                 delay.append((ts - m, n ))
                                 if(0<n<1):
-                                    reward+= 100*abs(1-(ts-m))*math.exp(-5*n)
+                                    reward += 100*abs(1-(ts-m))*math.exp(-5*n)
                             elif (n==1):
                                 reward -= 100*abs(1-(ts-m))
                             else:
